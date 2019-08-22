@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+   <tr>
+      <td>
+         <p>
+            <a href="/del_folder/{{ folder.id }}"><button>- DELETE FOLDER -</button></a>
+         </p>
+         
+         <form method='POST'>
+            {% csrf_token %}
+            <table>
+               {{ form.as_table }}
+            </table>
+            <button type="submit">Save</button>
+         </form>
+      </td>
+      <td>
+         {% include "tasks_list.html" %}
+      </td>
+   </tr>
+</table>
+{% endblock %}

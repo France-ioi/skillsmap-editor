@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+   <tr>
+      <td valign="top">
+         {% include "skill_editor.html" %}
+      </td>
+      <td valign="top">
+         {% include "skills_tree.html" %}
+      </td>
+   </tr>
+</table>
+
+{% include "selector.html" %}
+{% endblock %}

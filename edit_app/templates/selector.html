@@ -1,0 +1,66 @@
+<script>
+skills = [
+   {% for skill in skills %}
+      {% if not skill.is_deleted %}
+      {'name': "{{ skill.name }}", "full": "{{ skill }}", 'id': {{ skill.id }} },
+      {% endif %}
+   {% endfor %}
+];
+
+tasks = [
+   {% for task in tasks %}
+      {'name': "{{ task.name }}", 'full': "{{ task.name }}", 'id': {{ task.id }} },
+   {% endfor %}
+];
+
+folders = [
+   {% for folder in folders %}
+      {'name': "{{ folder.name }}", 'full': "{{ folder.name }}", 'id': {{ folder.id }} },
+   {% endfor %}
+];
+</script>
+
+<div id="search_panel" style="display: none;background-color: white; width: 800px;border: 1px solid black;position: absolute;top:0px;right:0px;padding: 5px;">
+   <input id="search_bar" style="width: 750px;"/>
+   <button type="button" onclick="close_panel()">X</button>
+   <div id="results" style="overflow-y: auto;height: 600px;">
+   </div>
+</div>
+
+<script>
+search_bar = document.getElementById("search_bar");
+search_panel = document.getElementById("search_panel");
+results = document.getElementById("results");
+base_url = "", end_url = "";
+options = []
+
+function update() {
+   results.innerHTML = "";
+   
+   for(var option in options) {
+      if(options[option].name.toLowerCase().includes(search_bar.value.toLowerCase())) {
+         results.innerHTML += "<a href='" + base_url + options[option].id + end_url + "'>" + options[option].full + "</a><br/>";
+      }
+   }
+}
+
+function select(base, _options, end = "") {
+   options = _options;
+   search_panel.style.display = "block";
+   base_url = base;
+   end_url = end;
+   update();
+   search_bar.focus();
+   return false;
+}
+
+function close_panel() {
+   search_panel.style.display = "none";
+   search_bar.value = "";
+}
+
+search_bar.addEventListener("input", function() {
+   update();
+}, false);
+
+</script>

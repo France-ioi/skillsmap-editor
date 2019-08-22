@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+   <tr>
+      <td valign="top">
+         {% include "skill_editor.html" %}
+      </td>
+      <td valign="top">
+         <p>
+            <a href="/edit_skill/{{skill.id}}"><button> X CLOSE X </button></a>
+            Versions for {{skill.name}} :
+         </p>
+
+         <ul>
+         {% for version in versions %}
+            <li><a href="/view_version/{{skill.id}}/{{forloop.counter0}}" style="color: black;"><b>{{ version.revision.get_comment }}</b></a> {{ version.revision.date_created|date:"d M Y H:i:s" }} by {{ version.revision.user.username }}</li>
+         {% endfor %}
+         </ul>
+
+         <b>Pay attention to the time zone</b>
+      </td>
+   </tr>
+</table>
+
+{% include "selector.html" %}
+{% endblock %}
+
+

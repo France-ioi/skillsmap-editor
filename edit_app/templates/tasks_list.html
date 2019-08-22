@@ -1,0 +1,25 @@
+<p>
+<a href="/cre_task"><button>+ ADD TASK +</button></a>
+<a href="/add_folder"><button>+ ADD FOLDER +</button></a>
+<a href="/"><button>SKILLS TREE</button></a>
+</p>
+
+<p>
+   <span style="color:red;">Todo</span>
+   <span style="color:orange;">Waiting for validation</span>
+   <span style="color:blue;">Validated</span>
+   <span style="color:purple;">Skills</span>
+</p>
+
+<ul>
+{% for folder in folders %}
+   <li>
+      <a href="/edit_folder/{{folder.id}}" style="color:black;">{{ folder.name }}</a>
+      <ul>
+         {% for task in folder.task_set.all %}
+            <li> <a href="/edit_task/{{ task.id }}" style="color:{{task.status}};">{{ task.name }}</a> {% for skill in task.skills.all %} <span style="color:purple;"> {{ skill.name }} </span>, {% endfor %}</li>
+         {% endfor %}
+      </ul>
+   </li>
+{% endfor %}
+</ul>

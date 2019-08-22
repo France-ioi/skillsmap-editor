@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>
+   <a href="/add_skill/{{skill.id}}"><button>+ CREATE CHILD SKILL +</button></a>
+   <a href="/del_skill/{{ skill.id }}"><button>- DELETE SKILL -</button></a>
+   <a href="/restore/{{ skill.id }}/{{ version_id }}"><button>&gt; RESTORE VERSION &lt;</button></a>
+   <a href="/view_versions/{{ skill.id }}"><button>X CLOSE X</button></a>
+</p>
+
+<form method='POST' action="/edit_skill/{{skill.id}}">
+   {% csrf_token %}
+   <table>
+      <tr>
+         <td><label for="{{ form.name.id_for_label }}">Name</label></td>
+         <td>{{ form.name }}</td>
+         <td><input type="text" value="{{ version.field_dict.name }}"/></td>
+      </tr>
+      
+      <tr>
+         <td valign="top"><label>Parent</label></td>
+         <td>
+            {% if skill.parent %}
+               <a style="color: blue;" href="/edit_skill/{{skill.parent.id}}">{{ skill.parent.name }}</a>
+               <button type="button" onclick="select('/add_sub/parent/{{skill.id}}/', skills)">Change</button>
+            {% else %}
+               None
+            {% endif %}
+         </td>
+         <td>
+            {% if parent %}
+               {{ parent.name }}
+            {% else %}
+               None
+            {% endif %}
+         </td>
+      </tr>
+      
+      <tr>
+         <td valign="top"><label>Prerequisites</label></td>
+         <td>
+            <button type="button" onclick="select('/add_sub/prerequisites/{{skill.id}}/', skills)">+</button>
+            <ul>
+            {% for prerequisite in skill.prerequisites.all %}
+               {% if not prerequisite.is_deleted %}
+               <li>
+                  <a style="color: magenta;" href="/edit_skill/{{ prerequisite.id }}">{{ prerequisite.name }}</a> 
+                  <a href="/rem_sub/prerequisites/{{skill.id}}/{{prerequisite.id}}"><button type="button">-</button></a>
+               </li>
+               {% endif %}
+            {% endfor %}
+            </ul>
+         </td>
+         
+         <td>
+            <ul>
+            {% for prerequisite in prerequisites %}
+               {% if not prerequisite.is_deleted %}
+               <li style="color: magenta;">
+                  {{ prerequisite.name }}
+               </li>
+               {% endif %}
+            {% endfor %}
+            </ul>
+         </td>
+      </tr>
+      
+      <tr>
+         <td valign="top"><label>Subskills</label></td>
+         <td>
+            <button type="button" onclick="select('/add_sub/subskills/{{skill.id}}/', skills)">+</button>
+            <ul>
+            {% for child in skill.subskills.all %}
+               {% if not child.is_deleted %}
+               <li> <a style="color: purple;" href="/edit_skill/{{child.id}}">{{ child.name }}</a> 
+                    <a href="/rem_sub/subskills/{{skill.id}}/{{child.id}}"><button type="button">-</button></a> 
+               </li>
+               {% endif %}
+            {% endfor %}
+            </ul>
+            AND OFFICIAL CHILDREN
+         </td>
+         
+         <td>
+            <ul>
+            {% for child in subskills %}
+               {% if not child.is_deleted %}
+               <li style="color: purple;">
+                  {{ child.name }}
+               </li>
+               {% endif %}
+            {% endfor %}
+            </ul>
+            AND OFFICIAL CHILDREN
+         </td>
+      </tr>
+      
+      <tr>
+         <td><label for="{{ form.validation.id_for_label }}">Validation</label></td>
+         <td>{{ form.validation }}</td>
+         <td>{{ version.field_dict.validation }}</td>
+      </tr>
+      
+      <tr>
+         <td><label for="{{ form.abstract.id_for_label }}">Abstract</label></td>
+         <td>{{ form.abstract }}</td>
+         <td>
+<textarea>
+{{ version.field_dict.abstract }}
+</textarea>
+         </td>
+      </tr>
+      
+      <tr>
+         <td><label for="{{ form.difficulty.id_for_label }}">Difficulty</label></td>
+         <td>{{ form.difficulty }}</td>
+         <td>{{ version.field_dict.difficulty }}</td>
+      </tr>
+      
+      <tr>
+         <td><label for="{{ form.resources.id_for_label }}">Resources</label></td>
+         <td>{{ form.resources }}</td>
+         <td>
+<textarea>
+{{ version.field_dict.resources }}
+</textarea>
+         </td>
+      </tr>
+      
+      <tr>
+         <td valign="top"><label>Introductory&nbsp;Tasks</label></td>
+         <td>
+            <button type="button" onclick="select('/add_task/introductory_tasks/{{skill.id}}/', tasks)">+</button>
+            <ul>
+            {% for task in skill.introductory_tasks.all %}
+               <li> <a style="color: blue;" href="/edit_task/{{task.id}}">{{ task.name }}</a> 
+                    <a href="/rem_task/introductory_tasks/{{skill.id}}/{{task.id}}"><button type="button">-</button></a> 
+               </li>
+            {% endfor %}
+            </ul>
+         </td>
+         <td>
+            <ul>
+            {% for task in introductory_tasks %}
+               <li style="color: blue;">
+                  {{ task.name }}
+               </li>
+            {% endfor %}
+           </ul>
+      </tr>
+      
+      <tr>
+         <td><label for="{{ form.comments.id_for_label }}">Comments</label></td>
+         <td>{{ form.comments }}</td>
+      </tr>
+      
+      <tr>
+         <td><label for="{{ form.status.id_for_label }}">Status</label></td>
+         <td>{{ form.status }}</td>
+      </tr>
+   </table>
+   <button type='submit'>Save</button>
+</form>
+
+{% include "selector.html" %}
+{% endblock %}

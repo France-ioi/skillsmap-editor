@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<table>
+   <tr>
+      <td valign="top">
+         <p>
+            <a href="/del_task/{{ task.id }}"><button>- DELETE TASK -</button></a>
+         </p>
+         
+         <form method='POST'>
+            {% csrf_token %}
+            <table>
+               <tr>
+                  <td><label>Folder</label></td>
+                  <td>
+                     {{ task.parent.name }}
+                     <button type="button" onclick="select('/change_folder/{{ task.id }}/', folders)">Change</button>
+                  </td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.name.id_for_label }}">Name</label></td>
+                  <td>{{ form.name }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.path.id_for_label }}">SVN Path</label></td>
+                  <td>{{ form.path }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.source.id_for_label }}">Source</label></td>
+                  <td>{{ form.source }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.task_abstract.id_for_label }}">Task&nbsp;Abstract</label></td>
+                  <td>{{ form.task_abstract }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.solution_abstract.id_for_label }}">Solution&nbsp;Abstract</label></td>
+                  <td>{{ form.solution_abstract }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label>Skills</label></td>
+                  <td>
+                     <button type="button" onclick="select('/add_task/tasks/', skills, '/{{task.id}}')">+</button>
+                     {% for skill in task.skills.all %}
+                        {% if not skill.is_deleted %}
+                        <li> <a style="color: blue;" href="/edit_skill/{{skill.id}}">{{ skill.name }}</a> 
+                             <a href="/rem_task/tasks/{{skill.id}}/{{task.id}}"><button type="button">-</button></a>
+                        </li>
+                        {% endif %}
+                     {% endfor %}
+                  </td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.difficulty.id_for_label }}">Difficulty</label></td>
+                  <td>{{ form.difficulty }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.comments.id_for_label }}">Comments</label></td>
+                  <td>{{ form.comments }}</td>
+               </tr>
+               
+               <tr>
+                  <td><label for="{{ form.status.id_for_label }}">Status</label></td>
+                  <td>{{ form.status }}</td>
+               </tr>
+            </table>
+            <button type='submit'>Save</button>
+         </form>
+      </td>
+      
+      <td valign="top">
+         {% include "tasks_list.html" %}
+      </td>
+   </tr>
+</table>
+
+{% include "selector.html" %}
+{% endblock %}

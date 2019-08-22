@@ -1,0 +1,52 @@
+<p>
+<a href="/list_task"><button>TASK LIST</button></a>
+<a href="/list_deleted"><button>VIEW DELETED SKILLS</button></a>
+<a href="/change_datetime"><button>CHANGE TIME REFERENCE</button></a>
+</p>
+
+<p>
+   <span style="color: red;">Todo</span>
+   <span style="color: orange;">Waiting for validation</span>
+   <span style="color: blue;">Validated</span>
+   <span style="color: black;font-style: italic">Other Subskill</span>
+   <span style="color: magenta;">Prerequisite</span>
+</p>
+
+<ul id="tree_container">
+</ul>
+
+<script>
+data = {{ json_tree|safe }};
+
+var root = {{ root.id }};
+
+function render_tree(node) {
+   var html = "<li>";
+   html += "<a href='/edit_skill/" + node + "' style='color:" + data[node].status + ";"
+   if(data[node].modified)
+      html += "background-color: yellow;";
+   html += "' title='" + data[node].title + "Other Parents : "
+   for(var iSkill in data[node].surskills) {
+      html += data[data[node].surskills[iSkill]].name + ", ";
+   }
+   html +=  "'>" + data[node].name + "</a>";
+   
+   for(var iPrereq in data[node].prerequisites) {
+      html += ", <a href='/edit_skill/" + data[node].prerequisites[iPrereq] + "' style='color: magenta;'>" + data[data[node].prerequisites[iPrereq]].name + "</a>";
+   }
+   
+   html += "<ul>";
+   for(var iChild in data[node].subskills) {
+      html += "<li><a href='/edit_skill/" + data[node].subskills[iChild] + "' style='color: black;font-style: italic;'>" + data[data[node].subskills[iChild]].name + "</a></li>"
+   }
+   
+   for(var iChild in data[node].children) {
+      html += render_tree(data[node].children[iChild]);
+   }
+   html += "</ul>";
+   html += "</li>"
+   return html;
+}
+
+document.getElementById("tree_container").innerHTML += render_tree(root);
+</script>

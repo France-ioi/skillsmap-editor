@@ -1,0 +1,35 @@
+{% for skill in skills_list %}
+   <li>
+      <a href="/edit_skill/{{ skill.id }}" style="color:{{skill.status}};{% if skill.last_update > date %}
+         background-color: yellow;
+      {% endif %}" >{{ skill.name }}</a>
+      
+      {% for surskill in skill.surskills.all %}
+         {% if not surskill.is_deleted %}
+         , <a href="/edit_skill/{{surskill.id}}" style="color: black;"> {{ surskill.name }} </a>
+         {% endif %}
+      {% endfor %}
+      
+      {% for prereq in skill.prerequisites.all %}
+         {% if not prereq.is_deleted %}
+         , <a href="/edit_skill/{{prereq.id}}" style="color: magenta;"> {{ prereq.name }} </a>
+         {% endif %}
+      {% endfor %}
+      
+      <ul>
+      {% for child in skill.subskills.all %}
+         {% if not child.is_deleted %}
+         <li style="color: purple;">
+            <a href="/edit_skill/{{child.id}}" style="color: purple;"> {{ child.name }} </a>
+         </li>
+         {% endif %}
+      {% endfor %}
+      </ul>
+      
+      {% if skill.children.all|length %}
+         <ul>
+            {% include "skills_node.html" with skills_list=skill.children.all %}
+         </ul>
+      {% endif %}
+   </li>
+{% endfor %}

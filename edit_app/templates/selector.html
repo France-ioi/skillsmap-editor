@@ -1,9 +1,7 @@
 <script>
 skills = [
    {% for skill in skills %}
-      {% if not skill.is_deleted %}
       {'name': "{{ skill.name }}", "full": "{{ skill }}", 'id': {{ skill.id }} },
-      {% endif %}
    {% endfor %}
 ];
 

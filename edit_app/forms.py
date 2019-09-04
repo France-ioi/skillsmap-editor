@@ -1,6 +1,6 @@
 from django.forms import *
 from .models import *
-import datetime
+from django.utils import timezone
 
 class SkillForm(ModelForm):
    class Meta:
@@ -18,4 +18,4 @@ class FolderForm(ModelForm):
       fields = ['name']
 
 class DatetimeForm(forms.Form):
-   datetime = DateTimeField(initial=datetime.datetime.now)
+   datetime = DateTimeField(initial=timezone.now)

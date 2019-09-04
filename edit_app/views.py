@@ -20,7 +20,7 @@ def generate_tree(request):
    for skill in Skill.objects.all().prefetch_related('surskills', 'children', 'prerequisites', 'subskills'):
       json += str(skill.id) + ": {"
       json += skill.jsonify() + "modified: "
-      if skill.last_update() > request.session.get('datetime', timezone.now()).strftime('%Y-%m-%d %H:%M:%S.%f'):
+      if skill.last_update() > request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f')):
          json += "true"
       else:
          json += "false"
@@ -77,7 +77,6 @@ def edit_skill(request, num):
    if request.method == 'POST':
       form = SkillForm(request.POST, request.FILES, instance=skill)
       
-      print(form.has_changed())
       if form.is_valid() and form.has_changed():
          with reversion.create_revision():
             reversion.set_comment("Edit Skill " + str(form.instance.name))
@@ -94,7 +93,7 @@ def edit_skill(request, num):
       'json_tree': generate_tree(request),
       'skills': Skill.objects.all(),
       'folders': Folder.objects.all(),
-      'date': request.session.get('datetime', timezone.now())
+      'date': request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
    })
 
 @login_required
@@ -327,7 +326,7 @@ def view_versions(request, num_skill):
       'tasks': Task.objects.all(),
       'skills': Skill.objects.all(),
       'root': roots[0],
-      'date': request.session.get('datetime', timezone.now())
+      'date': request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
    })
 
 @login_required

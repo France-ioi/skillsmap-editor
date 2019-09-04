@@ -1,6 +1,7 @@
 from django.db import models
 import reversion
 from reversion.models import Version
+from django.utils import timezone
 
 difficulties = [
    (0, "Nothing new to find"),
@@ -74,7 +75,7 @@ class Skill(models.Model):
    def last_update(self):
       versions = Version.objects.get_for_object(self)
       if len(versions) != 0:
-         return versions[0].revision.date_created.strftime('%Y-%m-%d %H:%M:%S.%f')
+         return timezone.localtime(versions[0].revision.date_created).strftime('%Y-%m-%d %H:%M:%S.%f')
       else:
          return ""
    
@@ -82,9 +83,9 @@ class Skill(models.Model):
       versions = Version.objects.get_for_object(self)
       if len(versions) != 0:
          if versions[0].revision.user:
-            return versions[0].revision.date_created.strftime('%Y-%m-%d %H:%M:%S.%f') + " by " + versions[0].revision.user.username
+            return timezone.localtime(versions[0].revision.date_created).strftime('%Y-%m-%d %H:%M:%S.%f') + " by " + versions[0].revision.user.username
          else:
-            return versions[0].revision.date_created.strftime('%Y-%m-%d %H:%M:%S.%f')
+            return timezone.localtime(versions[0].revision.date_created).strftime('%Y-%m-%d %H:%M:%S.%f')
       else:
          return ""
    

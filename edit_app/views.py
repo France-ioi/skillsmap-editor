@@ -6,6 +6,7 @@ from .models import *
 from .forms import *
 from datetime import datetime
 from django.utils import timezone
+from django.utils import timezone
 from reversion.models import Version
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -15,18 +16,60 @@ import pytz
 roots = Skill.objects.filter(name='root')
 deleteds = Skill.objects.filter(name='deleted')
 
+def jsonify(skill, skills):
+   json = 'name: "' + skill.name + '",'
+   json += 'children: ['
+   for child in skill.children.all():
+      json += str(child.id) + ', '
+   json += '],'
+   json += 'status: "' + skill.status + '",'
+   json += 'surskills: ['
+   for surskill in skill.surskills.all():
+      if not is_deleted(surskill, skills):
+         json += str(surskill.id) + ', '
+   json += "],"
+   json += 'prerequisites: ['
+   for prereq in skill.prerequisites.all():
+      if not is_deleted(prereq, skills):
+         json += str(prereq.id) + ', '
+   json += "],"
+   json += 'subskills: ['
+   for subskill in skill.subskills.all():
+      if not is_deleted(subskill, skills):
+         json += str(subskill.id) + ', '
+   json += "],"
+   json += 'title: "Last edit : ' + skill.last_update + '\\n'
+   json += 'Status : ' + status_types_dict[skill.status] + '\\n'
+   json += '",'
+   return json
+
+def is_deleted(skill, skills):
+   curSkill = skill
+   while curSkill != None:
+      curSkill = skills[curSkill.id]
+      if curSkill.name == 'deleted':
+         return True
+      curSkill = curSkill.parent
+   return False
+
 def generate_tree(request):
    json = "{"
-   for skill in Skill.objects.all().prefetch_related('surskills', 'children', 'prerequisites', 'subskills'):
+   skills = dict([(obj.id, obj) for obj in Skill.objects.prefetch_related('surskills', 'children', 'prerequisites', 'subskills', 'parent').all()])
+   
+   for pk in skills:
+      skill = skills[pk]
       json += str(skill.id) + ": {"
-      json += skill.jsonify() + "modified: "
-      if skill.last_update() > request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f')):
+      json += jsonify(skill, skills) + "modified: "
+      if skill.last_update > request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f')):
          json += "true"
       else:
          json += "false"
       json += "},"
    json += "}"
    return json
+
+def gen_update_text(request):
+    return timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f') + " by " + request.user.username
 
 def index(request):
    if not request.user.is_authenticated:
@@ -64,7 +107,7 @@ def add_skill(request, num):
       reversion.set_date_created(timezone.now())
       reversion.set_user(request.user)
       
-      new_skill = Skill(parent = skill, name = 'new_skill')
+      new_skill = Skill(parent = skill, name = 'new_skill', last_update = gen_update_text(request))
       new_skill.save()
    
    return redirect('/edit_skill/' + str(new_skill.id))
@@ -84,6 +127,7 @@ def edit_skill(request, num):
             reversion.set_user(request.user)
             
             form.save()
+            skill.last_update = gen_update_text(request)
    form = SkillForm(instance=skill)
    return render(request, 'edit_skill.html', {
       'form' : form, 
@@ -91,7 +135,7 @@ def edit_skill(request, num):
       'root': roots[0],
       'tasks': Task.objects.all(),
       'json_tree': generate_tree(request),
-      'skills': Skill.objects.all(),
+      'skills': Skill.objects.all().prefetch_related('parent'),
       'folders': Folder.objects.all(),
       'date': request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
    })
@@ -111,6 +155,7 @@ def del_skill(request, num):
       reversion.set_user(request.user)
       
       skill.parent = deleteds[0]
+      skill.last_update = gen_update_text(request)
       skill.save()
       
    return redirect('/')
@@ -144,7 +189,7 @@ def edit_task(request, num):
       'form' : form,
       'task' : task, 
       'tasks': Task.objects.all(),
-      'skills': Skill.objects.all(),
+      'skills': Skill.objects.all().prefetch_related('parent'),
       'folders': Folder.objects.all()
    })
 
@@ -182,7 +227,7 @@ def edit_folder(request, num):
       'form' : form,
       'folder': folder,
       'tasks': Task.objects.all(),
-      'skills': Skill.objects.all(),
+      'skills': Skill.objects.all().prefetch_related('parent'),
       'folders': Folder.objects.all()
    })
 
@@ -219,6 +264,7 @@ def rem_sub(request, table, num_skill, num_other):
       reversion.set_user(request.user)
       
       objects.remove(other)
+      skill.last_update = gen_update_text(request)
       skill.save()
    
    return redirect('/edit_skill/' + str(num_skill))
@@ -250,6 +296,8 @@ def add_sub(request, table, num_skill, num_other):
             
          else:
             skill.parent = other
+      
+      skill.last_update = gen_update_text(request)
       skill.save()
       
    return redirect('/edit_skill/' + str(num_skill))
@@ -324,7 +372,7 @@ def view_versions(request, num_skill):
       'versions': versions,
       'form': SkillForm(instance=skill),
       'tasks': Task.objects.all(),
-      'skills': Skill.objects.all(),
+      'skills': Skill.objects.all().prefetch_related('parent'),
       'root': roots[0],
       'date': request.session.get('datetime', timezone.now().strftime('%Y-%m-%d %H:%M:%S.%f'))
    })
@@ -366,7 +414,7 @@ def view_version(request, num_skill, num_version):
       'version_id': num_version,
       'form': SkillForm(instance=skill),
       'tasks': Task.objects.all(),
-      'skills': Skill.objects.all()
+      'skills': Skill.objects.all().prefetch_related('parent')
    })
 
 @login_required
@@ -409,6 +457,7 @@ def restore_version(request, num_skill, num_version):
          if len(Task.objects.filter(id=task_id)) != 0:
             skill.introductory_tasks.add(Task.objects.filter(id=task_id)[0])
       
+      skill.last_update = gen_update_text(request)
       skill.save()
    
    return redirect('/edit_skill/' + str(num_skill))

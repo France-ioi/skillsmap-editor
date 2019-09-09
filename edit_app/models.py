@@ -67,59 +67,9 @@ class Skill(models.Model):
       ('OR', 'Or'),
    ], default='AND')
    
+   last_update = models.CharField(max_length=256)
+   
    def __str__(self):
       if self.parent:
          return self.name + "      (" + self.parent.name + ")"
       return self.name
-   
-   def last_update(self):
-      versions = Version.objects.get_for_object(self)
-      if len(versions) != 0:
-         return timezone.localtime(versions[0].revision.date_created).strftime('%Y-%m-%d %H:%M:%S.%f')
-      else:
-         return ""
-   
-   def last_update_text(self):
-      versions = Version.objects.get_for_object(self)
-      if len(versions) != 0:
-         if versions[0].revision.user:
-            return timezone.localtime(versions[0].revision.date_created).strftime('%Y-%m-%d %H:%M:%S.%f') + " by " + versions[0].revision.user.username
-         else:
-            return timezone.localtime(versions[0].revision.date_created).strftime('%Y-%m-%d %H:%M:%S.%f')
-      else:
-         return ""
-   
-   def jsonify(self):
-      json = 'name: "' + self.name + '",'
-      json += 'children: ['
-      for child in self.children.all():
-         json += str(child.id) + ', '
-      json += '],'
-      json += 'status: "' + self.status + '",'
-      json += 'surskills: ['
-      for surskill in self.surskills.all():
-         if not surskill.is_deleted():
-            json += str(surskill.id) + ', '
-      json += "],"
-      json += 'prerequisites: ['
-      for prereq in self.prerequisites.all():
-         if not prereq.is_deleted():
-            json += str(prereq.id) + ', '
-      json += "],"
-      json += 'subskills: ['
-      for subskill in self.subskills.all():
-         if not subskill.is_deleted():
-            json += str(subskill.id) + ', '
-      json += "],"
-      json += 'title: "Last edit : ' + self.last_update_text() + '\\n'
-      json += 'Status : ' + status_types_dict[self.status] + '\\n'
-      json += '",'
-      return json
-   
-   def is_deleted(self):
-      curSkill = self
-      while curSkill != None:
-         if curSkill.name == 'deleted':
-            return True
-         curSkill = curSkill.parent
-      return False

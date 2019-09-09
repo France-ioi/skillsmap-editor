@@ -11,6 +11,24 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        }
+    },
+    'loggers': {
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    }
+}
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +41,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'sac#l)yug^rq!@*pb@9wub&f9!s#x!*0rz@blkujx6ax*u#oiq'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -78,9 +96,15 @@ WSGI_APPLICATION = 'Manager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'OPTIONS': {
-            'read_default_file': '/etc/mysql/my.cnf',
-        }
+        'NAME': 'skillsmap-editor',
+        'USER': 'arthur_leonard',
+        'PASSWORD': '',
+        'HOST': 'franceioi.cinniket56wn.eu-central-1.rds.amazonaws.com',
+        'PORT': '',
+        #'ENGINE': 'django.db.backends.mysql',
+        #'OPTIONS': {
+        #    'read_default_file': '/etc/mysql/my.cnf',
+        #}
     }
 }
 
